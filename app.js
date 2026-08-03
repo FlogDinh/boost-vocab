@@ -392,6 +392,22 @@ window.confirmQuitExercise = function () {
   }
 };
 
+function explanationHtml(entry) {
+  const synHtml = entry.s.length
+    ? `<div class="def-block">
+         <div class="def-label">Từ đồng nghĩa</div>
+         <ul class="def-list">${entry.s.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+       </div>`
+    : '';
+  const antoHtml = entry.a && entry.a.length
+    ? `<div class="def-block">
+         <div class="def-label anto">Từ trái nghĩa</div>
+         <ul class="def-list">${entry.a.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+       </div>`
+    : '';
+  return `<div class="explanation">${synHtml}${antoHtml}</div>`;
+}
+
 function mcqHtml(q, answered) {
   const chosen = answered ? state.exercise.answers[state.exercise.answers.length - 1] : null;
   const optionsHtml = q.options.map((opt, i) => {
@@ -410,6 +426,7 @@ function mcqHtml(q, answered) {
       ${ok ? '✓ Chính xác!' : '✗ Chưa đúng.'}
       ${!ok ? `<span class="sub">Đáp án đúng: ${escapeHtml(q.correctText)}</span>` : ''}
     </div>
+    ${explanationHtml(q.entry)}
     <div class="btn-row"><button class="btn" onclick="nextQuestion()">Tiếp tục →</button></div>`;
   }
   return `<div class="options">${optionsHtml}</div>${feedback}`;
@@ -448,19 +465,20 @@ function fillHtml(q, answered) {
 
   const last = state.exercise.answers[state.exercise.answers.length - 1];
   const ok = last.correct;
-  const antoNote = hasAnto
-    ? `<span class="sub">Trái nghĩa gợi ý: ${entry.a.map(escapeHtml).join(', ')}${last.userAntonym ? ' — bạn nhập: "' + escapeHtml(last.userAntonym) + '"' : ''}</span>`
-    : '';
   return `
     <div class="field-row">
       <label>Từ đồng nghĩa của bạn</label>
-      <input type="text" value="${escapeHtml(last.userSynonym)}" disabled>
+      <input type="text" value="${escapeHtml(last.userSynonym || '(bỏ trống)')}" disabled>
     </div>
+    ${hasAnto ? `
+    <div class="field-row">
+      <label>Từ trái nghĩa của bạn</label>
+      <input type="text" value="${escapeHtml(last.userAntonym || '(bỏ trống)')}" disabled>
+    </div>` : ''}
     <div class="feedback ${ok ? 'ok' : 'bad'}">
       ${ok ? '✓ Chính xác!' : '✗ Chưa đúng.'}
-      <span class="sub">Đáp án chấp nhận: ${entry.s.map(escapeHtml).join(', ')}</span>
-      ${antoNote}
     </div>
+    ${explanationHtml(entry)}
     <div class="btn-row"><button class="btn" onclick="nextQuestion()">Tiếp tục →</button></div>
   `;
 }
