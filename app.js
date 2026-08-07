@@ -3,10 +3,18 @@
 
 const app = document.getElementById('app');
 
-const PASSAGES = VOCAB_DATA.map(p => ({ test: p.test, passage: p.passage, key: p.test + '-' + p.passage, vocab: p.vocab }));
+const PASSAGES = VOCAB_DATA.map(p => ({
+  book: p.book,
+  test: p.test,
+  passage: p.passage,
+  key: p.book + '-' + p.test + '-' + p.passage,
+  vocab: p.vocab,
+}));
 
-function passageLabel(test, passage) {
-  return 'Test ' + test + ' - Bài ' + passage;
+const BOOKS = [...new Set(PASSAGES.map(p => p.book))];
+
+function passageLabel(book, test, passage) {
+  return book + ' · Test ' + test + ' - Bài ' + passage;
 }
 
 function shuffle(arr) {
@@ -38,7 +46,7 @@ function flattenScope(scopeKeys) {
   const out = [];
   PASSAGES.forEach(p => {
     if (!keySet.has(p.key)) return;
-    p.vocab.forEach(v => out.push({ ...v, _test: p.test, _passage: p.passage }));
+    p.vocab.forEach(v => out.push({ ...v, _book: p.book, _test: p.test, _passage: p.passage }));
   });
   return out;
 }
@@ -74,11 +82,15 @@ function goHome() { state.screen = 'home'; render(); }
 // ---------------------------------------------------------------------------
 function renderHome() {
   const totalWords = PASSAGES.reduce((n, p) => n + p.vocab.length, 0);
+  const bookSummary = BOOKS.map(b => {
+    const n = PASSAGES.filter(p => p.book === b).reduce((n, p) => n + p.vocab.length, 0);
+    return `${b} (${n} từ)`;
+  }).join(' &middot; ');
   app.innerHTML = `
     <div class="topbar">
       <div class="brand">📗 Boost Vocabulary</div>
     </div>
-    <div class="subtitle">IELTS Cambridge 20 &middot; ${totalWords} từ vựng &middot; 12 bài đọc</div>
+    <div class="subtitle">${bookSummary} &middot; ${totalWords} từ vựng &middot; ${PASSAGES.length} bài đọc</div>
     <div class="home-grid">
       <button class="mode-btn" onclick="openFlashSetup()">
         <span class="icon">🃏</span>
@@ -98,25 +110,50 @@ function renderHome() {
 // Scope selector (shared between Flashcard & Exercise setup)
 // ---------------------------------------------------------------------------
 function scopeGridHtml(selectedSet, toggleFnName) {
-  const chips = PASSAGES.map(p => {
-    const checked = selectedSet.has(p.key);
-    return `<div class="scope-chip ${checked ? 'checked' : ''}" onclick="${toggleFnName}('${p.key}')">
-      <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation(); ${toggleFnName}('${p.key}')">
-      <span>${passageLabel(p.test, p.passage)}</span>
-    </div>`;
+  const bookSections = BOOKS.map(book => {
+    const bookPassages = PASSAGES.filter(p => p.book === book);
+    const chips = bookPassages.map(p => {
+      const checked = selectedSet.has(p.key);
+      return `<div class="scope-chip ${checked ? 'checked' : ''}" onclick="${toggleFnName}('${p.key}')">
+        <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation(); ${toggleFnName}('${p.key}')">
+        <span>Test ${p.test} - Bài ${p.passage}</span>
+      </div>`;
+    }).join('');
+    return `
+      <div class="book-group">
+        <div class="book-group-header">
+          <span class="book-title">${escapeHtml(book)}</span>
+          <span class="book-toolbar">
+            <button class="link-btn" onclick="${toggleFnName}('__all_book__:${book}')">Chọn cả bộ</button>
+            <button class="link-btn" onclick="${toggleFnName}('__none_book__:${book}')">Bỏ chọn</button>
+          </span>
+        </div>
+        <div class="scope-grid">${chips}</div>
+      </div>
+    `;
   }).join('');
   return `
     <div class="scope-toolbar">
       <button class="btn secondary" onclick="${toggleFnName}('__all__')">Chọn tất cả</button>
-      <button class="btn secondary" onclick="${toggleFnName}('__none__')">Bỏ chọn</button>
+      <button class="btn secondary" onclick="${toggleFnName}('__none__')">Bỏ chọn tất cả</button>
     </div>
-    <div class="scope-grid">${chips}</div>
+    ${bookSections}
   `;
 }
 
 function toggleScope(setupObj, key) {
   if (key === '__all__') { setupObj.scope = new Set(ALL_KEYS); return; }
   if (key === '__none__') { setupObj.scope = new Set(); return; }
+  if (key.startsWith('__all_book__:')) {
+    const book = key.slice('__all_book__:'.length);
+    PASSAGES.filter(p => p.book === book).forEach(p => setupObj.scope.add(p.key));
+    return;
+  }
+  if (key.startsWith('__none_book__:')) {
+    const book = key.slice('__none_book__:'.length);
+    PASSAGES.filter(p => p.book === book).forEach(p => setupObj.scope.delete(p.key));
+    return;
+  }
   if (setupObj.scope.has(key)) setupObj.scope.delete(key);
   else setupObj.scope.add(key);
 }
@@ -198,7 +235,7 @@ function renderFlashView() {
     <button class="back-link" onclick="goHome()">← Trang chủ</button>
     <div class="progress-wrap">
       <span>Thẻ ${f.index + 1} / ${f.cards.length}</span>
-      <span>${passageLabel(card._test, card._passage)}</span>
+      <span>${passageLabel(card._book, card._test, card._passage)}</span>
     </div>
     <div class="progress-bar"><div style="width:${pct}%"></div></div>
 
@@ -377,7 +414,7 @@ function renderExRun() {
     </div>
     <div class="progress-bar"><div style="width:${pct}%"></div></div>
     <div class="card">
-      <span class="q-tag">${q.type === 'mcq' ? 'Trắc nghiệm' : 'Điền từ'} &middot; ${passageLabel(q.entry._test, q.entry._passage)}</span>
+      <span class="q-tag">${q.type === 'mcq' ? 'Trắc nghiệm' : 'Điền từ'} &middot; ${passageLabel(q.entry._book, q.entry._test, q.entry._passage)}</span>
       <div class="q-word">${escapeHtml(q.entry.w)}</div>
       ${q.entry.ipa ? `<div class="q-ipa">/${escapeHtml(q.entry.ipa)}/</div>` : ''}
       ${bodyHtml}

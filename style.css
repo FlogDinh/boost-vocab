@@ -152,8 +152,33 @@ h1, h2, h3 { margin: 0 0 4px; }
 }
 .section-title:first-child { margin-top: 0; }
 
-.scope-toolbar { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-2); }
+.scope-toolbar { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-3); }
 .scope-toolbar .btn { padding: 6px 12px; font-size: 0.8rem; }
+
+.book-group { margin-bottom: var(--sp-4); }
+.book-group:last-child { margin-bottom: 0; }
+.book-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+.book-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--brand);
+}
+.book-toolbar { display: flex; gap: var(--sp-2); }
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.link-btn:hover { color: var(--brand); }
 
 .scope-grid {
   display: grid;
