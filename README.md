@@ -1,8 +1,14 @@
-# Boost Vocabulary — IELTS Cambridge 20
+# Boost Vocabulary — IELTS Cambridge 18-20
 
-Ứng dụng web tĩnh (không cần cài đặt) để ôn từ vựng trích từ tài liệu
-"Boost your vocabulary" (A&M IELTS, dựa trên Cambridge IELTS 20) — 1145 từ
-vựng trên 12 bài đọc (Test 1-4, mỗi test 3 bài).
+Ứng dụng web tĩnh (không cần cài đặt) để ôn từ vựng trích từ bộ tài liệu
+"Boost your vocabulary" (A&M IELTS) — hiện có 3 cuốn Cambridge IELTS 18, 19
+và 20, tổng cộng khoảng 3300 từ vựng trên 36 bài đọc (mỗi cuốn 4 Test x 3
+bài).
+
+Cambridge IELTS 18 không in phiên âm IPA trong bản gốc, nên phần IPA của
+riêng cuốn này là phiên âm tự động tạo (từ điển phát âm CMU, giọng Anh-Mỹ),
+không phải trích xuất từ sách — có thể lệch nhẹ so với giọng Anh-Anh dùng ở
+Cam 19/20, và một số từ hiếm/thuật ngữ chuyên ngành chưa có phiên âm.
 
 ## Cách dùng
 

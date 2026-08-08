@@ -1,4 +1,4 @@
-/* Boost Vocabulary - IELTS Cambridge 20
+/* Boost Vocabulary - IELTS Cambridge 18-20
    Vanilla JS single-page app: Flashcards + Exercises over VOCAB_DATA (data.js) */
 
 const app = document.getElementById('app');
